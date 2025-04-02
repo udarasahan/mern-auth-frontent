@@ -1,6 +1,6 @@
-import React, { useContext, useState } from 'react'
-import { assets } from '../assets/assets'
-import { data, useNavigate } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
+import { assets } from '../assets/assets';
+import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -9,33 +9,82 @@ const Login = () => {
 
   const navigate =  useNavigate();
 
-  const { backendUrl, setIsLogin } = useContext(AppContext);
+  const { backendUrl, setIsLoggedin } = useContext(AppContext);
 
   const [state, setState] = useState("Sign Up");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // const onSubmitHandler = async (e) => {
+  //   try {
+  //     e.preventDefault();
+  //     console.log("Form submitted");
+  //     axios.defaults.withCredentials = true; // For sent cookies to the server
+
+  //     if (state === "Sign Up") {
+  //       const data = await axios.post(backendUrl + '/api/auth/register', {name, email, password})
+
+  //       if(data.success) {
+  //         setIsLoggedin(true)
+  //         navigate('/')
+  //       }else {
+  //       toast.error(data.message)
+  //       }
+  //     }else {
+  //       const data = await axios.post(backendUrl + '/api/auth/login', {email, password})
+
+  //       if(data.success) {
+  //         setIsLoggedin(true)
+  //         navigate('/')
+  //       }else {
+  //       toast.error(data.message)
+  //       }
+  //     }
+  //   } catch (error) {
+  //      toast.error(error.response.data.message)
+  //   }
+  // }
+
   const onSubmitHandler = async (e) => {
     try {
       e.preventDefault();
-
-      axios.defaults.withCredentials = true; // For sent cookies to the server
-
+      console.log("Form submitted"); // Debugging
+  
+      axios.defaults.withCredentials = true; // For sending cookies to the server
+  
       if (state === "Sign Up") {
-        const data = await axios.post(backendUrl + '/api/auth/register', {name, email, password})
-
-        if(data.success) {
-          setIsLogin(true)
-          navigate('/')
+        const response = await axios.post(backendUrl + "/api/auth/register", {
+          name,
+          email,
+          password,
+        });
+        const data = response.data; // Access the actual data
+  
+        if (data.success) {
+          setIsLoggedin(true);
+          navigate("/");
+        } else {
+          toast.error(data.message);
         }
-      }else {
-        toast.error(data.message)
+      } else {
+        const response = await axios.post(backendUrl + "/api/auth/login", {
+          email,
+          password,
+        });
+        const data = response.data; // Access the actual data
+  
+        if (data.success) {
+          setIsLoggedin(true);
+          navigate("/");
+        } else {
+          toast.error(data.message);
+        }
       }
     } catch (error) {
-       toast.error(error.response.data.message)
+      toast.error(error.response?.data?.message || "An error occurred");
     }
-  }
+  };
 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400'>
@@ -62,7 +111,7 @@ const Login = () => {
           </div>
           <p onClick={() => navigate('/reset-password')} className='mb-4 text-indigo-500 cursor-pointer'>Forgot password?</p>
 
-          <button className='w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium'>{state}</button>
+          <button type='submit' className='w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium'>{state}</button>
         </form>
 
         {state === "Sign Up" ? (
@@ -75,7 +124,6 @@ const Login = () => {
           </p>
         )}
 
-          
       </div>
     </div>
   )
